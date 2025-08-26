@@ -1,18 +1,22 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Media from '../models/media.model.js';
 import Rating from '../models/review.model.js';
 import ReviewVote from '../models/reviewVote.model.js'; // Add this import
 import { authenticateToken } from '../middleware/authi.js';
+import { optionalAuthenticateToken } from '../middleware/optionalAuth.js';
 import { voteOnReview } from '../controllers/reviewVoteController.js';
 import { isAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
 
+
 // Get all media
 router.get('/', async (req, res) => {
   try {
     const mediaList = await Media.find();
+    
     const mediaWithRatings = await Promise.all(
       mediaList.map(async (media) => {
         const ratings = await Rating.find({ media: media._id });
@@ -33,8 +37,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+// search 
+router.get('/search', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    
+    if (!q) {
+      return res.json([]); 
+    }
+    
+    const results = await Media.find({
+      $or: [
+        { title: { $regex: q, $options: 'i' } },
+        { description: { $regex: q, $options: 'i' } },
+        { genre: { $regex: q, $options: 'i' } },
+        { director: { $regex: q, $options: 'i' } }
+      ]
+    }).limit(100);
+    
+    res.json(results);
+  } catch (err) {
+    console.error('Search error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Get a single media by ID 
-router.get('/:id', async (req, res) => {
+router.get('/:id', optionalAuthenticateToken, async (req, res) => {
+
+  
   try {
     const media = await Media.findById(req.params.id);
     if (!media) return res.status(404).json({ error: 'Not found' });
@@ -81,27 +112,6 @@ router.post('/add', async (req, res) => {
     res.json({ message: 'Media added!', media: newMedia });
   } catch (err) {
     res.status(400).json({ error: err.message });
-  }
-});
-
-// search
-router.get('/search', async (req, res) => {
-  try {
-    const q = (req.query.q || '').trim();
-    if (!q) return res.json([]); 
-    const regex = new RegExp(q, 'i');
-    const results = await Media.find({
-      $or: [
-        { title: regex },
-        { description: regex },
-        { genre: regex },
-        { director: regex }
-      ]
-    }).limit(100);
-    res.json(results);
-  } catch (err) {
-    console.error('Media search error:', err);
-    res.status(500).json({ error: 'Server error' });
   }
 });
 
