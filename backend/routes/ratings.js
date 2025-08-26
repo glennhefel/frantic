@@ -55,4 +55,19 @@ router.post('/:mediaId', async (req, res) => {
 // POST /api/ratings/reviews/:reviewId/vote
 router.post('/reviews/:reviewId/vote', authenticateToken, voteOnReview);
 
+router.get('/reviews/:reviewId/user-vote', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const reviewId = req.params.reviewId;
+    
+    const userVote = await ReviewVote.findOne({
+      user: userId,
+      review: reviewId
+    });
+    
+    res.json({ value: userVote ? userVote.value : 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 export default router;

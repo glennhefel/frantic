@@ -1,10 +1,13 @@
 import express from 'express';
 import Media from '../models/media.model.js';
 import Rating from '../models/review.model.js';
+import ReviewVote from '../models/reviewVote.model.js'; // Add this import
 import { authenticateToken } from '../middleware/authi.js';
-import { vote } from '../controllers/ratingController.js';
+import { voteOnReview } from '../controllers/reviewVoteController.js';
 import { isAdmin } from '../middleware/isAdmin.js';
+
 const router = express.Router();
+
 
 // Get all media
 router.get('/', async (req, res) => {
@@ -30,7 +33,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a single media by ID
+// Get a single media by ID 
 router.get('/:id', async (req, res) => {
   try {
     const media = await Media.findById(req.params.id);
@@ -42,9 +45,26 @@ router.get('/:id', async (req, res) => {
       ? 0
       : reviews.reduce((sum, r) => sum + r.rating, 0) / total_votes;
 
+    // If user is authenticated, get their votes on these reviews
+    let reviewsWithUserVotes = reviews;
+    if (req.user) {
+      const userVotes = await ReviewVote.find({
+        user: req.user.id,
+        review: { $in: reviews.map(r => r._id) }
+      });
+
+      reviewsWithUserVotes = reviews.map(review => {
+        const userVote = userVotes.find(v => v.review.toString() === review._id.toString());
+        return {
+          ...review.toObject(),
+          userVote: userVote ? userVote.value : 0
+        };
+      });
+    }
+
     res.json({
       ...media.toObject(),
-      reviews,
+      reviews: reviewsWithUserVotes,
       average_rating,
       total_votes,
     });
@@ -85,8 +105,8 @@ router.get('/search', async (req, res) => {
   }
 });
 
-router.delete('/:id',authenticateToken, isAdmin, async (req, res) => {
-  console.log('DELETE request for:', req.params.id); // Debug log
+router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
+  console.log('DELETE request for:', req.params.id);
   try {
     const deleted = await Media.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Not found' });
@@ -95,6 +115,7 @@ router.delete('/:id',authenticateToken, isAdmin, async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
-router.post('/:mediaId/vote', authenticateToken, vote);
+
+router.post('/:mediaId/vote', authenticateToken, voteOnReview);
 
 export default router;

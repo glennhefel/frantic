@@ -56,7 +56,6 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// add/update current user (PATCH /api/users/me)
 router.patch('/me', authenticateToken, async (req, res) => {
   try {
     const uid = req.user?.id || req.user?._id;

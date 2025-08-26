@@ -7,13 +7,17 @@ function MediaDetail() {
   const { id } = useParams();
   const [media, setMedia] = useState(null);
   const [reviews, setReviews] = useState([]);
+ 
   const [showModal, setShowModal] = useState(false);
   const userId = localStorage.getItem('userId');
   const userReviewed = reviews.find(r => r.user && (r.user._id === userId || r.user.id === userId));
   
   
   useEffect(() => {
-    fetch(`http://localhost:5000/media/${id}`)
+    const token = localStorage.getItem('token');
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    
+    fetch(`http://localhost:5000/media/${id}`, { headers })
       .then(res => {
         if (!res.ok) throw new Error('Not found');
         return res.json();
@@ -21,7 +25,6 @@ function MediaDetail() {
       .then(data => {
         setMedia(data);
         setReviews(data.reviews || []);
-        
       })
       .catch(() => setMedia(null));
   }, [id]);
@@ -36,6 +39,7 @@ if (token) {
     isAdmin = false;
   }
 }
+
 const handleDelete = async () => {
   if (window.confirm('Are you sure you want to delete this media?')) {
     try {
@@ -80,7 +84,9 @@ const sendReviewVote = async (reviewId, value) => {
     }
 
     // refresh media (and reviews) to show updated counts
-    const mediaRes = await fetch(`http://localhost:5000/media/${id}`);
+    const mediaRes = await fetch(`http://localhost:5000/media/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     if (mediaRes.ok) {
       const data = await mediaRes.json();
       setMedia(data);
@@ -151,6 +157,7 @@ const sendReviewVote = async (reviewId, value) => {
           <p className="text-muted">No reviews yet.</p>
         ) : (
           reviews.map((review) => (
+
             <div key={review.id} className="border rounded p-3 my-3 shadow-sm bg-dark text-light">
               <strong>{review.user.username}</strong> rated it{' '}
               <span className="badge bg-warning text-dark">{review.rating}/10★</span>
@@ -162,8 +169,8 @@ const sendReviewVote = async (reviewId, value) => {
                 )}
               </p>
               <div className="d-flex gap-3 align-items-center mt-2">
-                <button onClick={() => handleUpvote(review._id)} className="btn btn-sm btn-outline-success">👍 {review.upvotes}</button>
-                <button onClick={() => handleDownvote(review._id)} className="btn btn-sm btn-outline-danger">👎 {review.downvotes}</button>
+                <button onClick={() => handleUpvote(review._id)} className={review.userVote === 1 ? 'btn btn-sm btn-success' : 'btn btn-sm btn-outline-success'}>👍 {review.upvotes}</button>
+                <button onClick={() => handleDownvote(review._id)} className={review.userVote === -1 ? 'btn btn-sm btn-danger' : 'btn btn-sm btn-outline-danger'}>👎 {review.downvotes}</button>
               </div>
             </div>
           ))
@@ -191,12 +198,14 @@ const sendReviewVote = async (reviewId, value) => {
   setShowModal(false);
 
   // refetch media details 
-  fetch(`http://localhost:5000/media/${id}`)
-    .then(res => res.json())
-    .then(data => {
-      setMedia(data);
-      setReviews(data.reviews || []);
-    });
+  const token = localStorage.getItem('token');
+const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+fetch(`http://localhost:5000/media/${id}`, { headers })
+  .then(res => res.json())
+  .then(data => {
+    setMedia(data);
+    setReviews(data.reviews || []);
+  });
 }}>
   <label htmlFor="rating">Rating (1–10):</label>
   <input
