@@ -15,6 +15,13 @@ function NavBar() {
     setSearch('');
   };
 
+  const handleLogout = () => {
+    // Remove all tokens and user info
+    localStorage.clear();
+    sessionStorage.clear();
+    // Optionally, you can add more cleanup here if needed
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark px-4 py-2 professional-navbar">
       <div className="container-fluid">
@@ -71,7 +78,7 @@ function NavBar() {
               {username || "Guest"}
             </Link>
           </div>
-          <Link className="btn btn-outline-danger btn-sm" to="/">
+          <Link className="btn btn-outline-danger btn-sm" to="/" onClick={handleLogout}>
             Logout
           </Link>
         </div>

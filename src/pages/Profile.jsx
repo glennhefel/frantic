@@ -24,23 +24,15 @@ export default function Profile() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const decoded = safeDecodeToken(token);
     
-    setLoading(true);
+    // If no token at all, show login message
     if (!token) {
-      const fallbackUser = decoded ? { 
-        _id: decoded.id || decoded._id, 
-        username: decoded.username, 
-        email: decoded.email 
-      } : null;
-      setUser(fallbackUser);
-      setUsernameInput(fallbackUser?.username || '');
       setLoading(false);
       return;
     }
 
-    // 
-    (async () => {
+    // Try to fetch user data from API
+    const fetchUser = async () => {
       try {
         const res = await fetch('http://localhost:5000/users/me', {
           headers: { Authorization: `Bearer ${token}` }
@@ -56,19 +48,29 @@ export default function Profile() {
         setUsernameInput(userData?.username || '');
       } catch (err) {
         console.error('Failed to fetch user:', err);
-        // fallback for email
-        const storedEmail = localStorage.getItem('email');
-        const fallbackUser = decoded ? { 
-          _id: decoded.id || decoded._id, 
-          username: decoded.username, 
-          email: decoded.email || storedEmail
-        } : null;
-        setUser(fallbackUser);
-        setUsernameInput(fallbackUser?.username || '');
+        
+        // If API fails, try to use decoded token 
+        const decoded = safeDecodeToken(token);
+        if (decoded) {
+          const fallbackUser = { 
+            _id: decoded.id || decoded._id, 
+            username: decoded.username, 
+            email: decoded.email || localStorage.getItem('email')
+          };
+          setUser(fallbackUser);
+          setUsernameInput(fallbackUser.username || '');
+        } else {
+          // If invalid, clear it and show login
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
+          localStorage.removeItem('email');
+        }
       } finally {
         setLoading(false);
       }
-    })();
+    };
+
+    fetchUser();
   }, []);
 
   const updateUsername = async (e) => {
@@ -96,8 +98,6 @@ export default function Profile() {
       const data = await res.json();
       const updatedUser = data.user || data;
       setUser(prev => ({ ...prev, ...updatedUser }));
-      
-      // Also update localStorage username
       localStorage.setItem('username', updatedUser.username);
       
       alert('Username updated successfully!');
@@ -160,7 +160,7 @@ export default function Profile() {
       <div className="homepage-dark" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <div className="profile-page container py-4" style={{ flex: 1 }}>
           <p>Please log in to view your profile.</p>
-          <Link to="/login" className="btn btn-sm btn-primary">Login</Link>
+          <Link to="/" className="btn btn-sm btn-primary">Login</Link>
         </div>
       </div>
     </>
@@ -176,7 +176,7 @@ export default function Profile() {
               <img src={user.avatar || '/logo192.png'} alt="avatar" className="profile-avatar" />
               <div>
                 <h3 className="mb-0">{user.username || 'Unknown'}</h3>
-                <div className="mb-muted">{user.email || localStorage.getItem('email') || 'No email found'}</div>
+                <div className="mb-muted">{user.email || 'No email found'}</div>
               </div>
             </div>
 

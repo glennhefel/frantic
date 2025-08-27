@@ -22,8 +22,8 @@ body, html {
 .movie-container {
   display: flex;
   align-items: flex-start;
-  max-width: 1400px;    /* Increase from 1200px to 1400px */
-  width: 96vw;          /* Increase from default to 96vw */
+  max-width: 1400px;    
+  width: 96vw;          
   margin: 0 auto 2rem auto;
   padding: 2rem;
   background-color: #282c34;

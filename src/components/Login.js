@@ -38,6 +38,11 @@ function LoginForm() {
     }
   };
 
+  const handleProceed = (e) => {
+    e.preventDefault();
+    navigate('/home');
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <InputField
@@ -58,7 +63,12 @@ function LoginForm() {
         onChange={handleChange}
         required
       />
-  <button type="submit" className="btn btn-outline-warning btn-sm mb-3 px-3 py-2 rounded">Log In</button>
+      <button type="submit" className="btn btn-outline-warning btn-sm mb-3 px-3 py-2 rounded">Log In</button>
+      <div style={{ marginTop: '10px' }}>
+        <button onClick={handleProceed} className="btn btn-outline-secondary btn-sm px-3 py-2 rounded">
+          Proceed without sign in
+        </button>
+      </div>
     </form>
   );
 }

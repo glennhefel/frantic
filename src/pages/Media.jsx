@@ -156,7 +156,7 @@ function MediaDetail() {
               Reviews ({reviews.length})
             </h4>
             
-            {/* Quick Add Review Button */}
+            
             <div className="quick-review-container">
               <div className="user-avatar-small">
                 <span>👤</span>
@@ -170,7 +170,7 @@ function MediaDetail() {
             </div>
           </div>
 
-          {/* Reviews List */}
+          
           <div className="reviews-list">
             {reviews.length === 0 ? (
               <div className="no-reviews">
@@ -243,7 +243,7 @@ function MediaDetail() {
           </div>
         </div>
 
-        {/* Improved Modal */}
+        {/*Modal */}
         {showModal && (
           <div className="review-modal">
             <div className="modal-content-box">

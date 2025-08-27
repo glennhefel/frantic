@@ -8,8 +8,7 @@ export const voteOnReview = async (req, res) => {
     const userId = req.user?.id || req.user?._id;
     const value = Number(req.body.value); // 1 or -1
 
-    if (!mongoose.Types.ObjectId.isValid(reviewId)) return res.status(400).json({ message: 'Invalid review id' });
-    if (![1, -1].includes(value)) return res.status(400).json({ message: 'Invalid vote value' });
+   
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const existing = await ReviewVote.findOne({ review: reviewId, user: userId });
@@ -25,23 +24,12 @@ export const voteOnReview = async (req, res) => {
       await ReviewVote.create({ review: reviewId, user: userId, value });
     }
 
-    const agg = await ReviewVote.aggregate([
-      { $match: { review: new mongoose.Types.ObjectId(reviewId) } },
-      {
-        $group: {
-          _id: '$review',
-          upvotes: { $sum: { $cond: [{ $eq: ['$value', 1] }, 1, 0] } },
-          downvotes: { $sum: { $cond: [{ $eq: ['$value', -1] }, 1, 0] } },
-          score: { $sum: '$value' },
-          total: { $sum: 1 }
-        }
-      }
-    ]);
-
-    const upvotes = agg[0]?.upvotes || 0;
-    const downvotes = agg[0]?.downvotes || 0;
-    const score = agg[0]?.score || 0;
-    const total_votes = agg[0]?.total || 0;
+  // Simpler: fetch all votes and calculate stats in JS
+  const votes = await ReviewVote.find({ review: reviewId });
+  const upvotes = votes.filter(v => v.value === 1).length;
+  const downvotes = votes.filter(v => v.value === -1).length;
+  const score = votes.reduce((sum, v) => sum + v.value, 0);
+  const total_votes = votes.length;
 
     await Review.findByIdAndUpdate(reviewId, { upvotes, downvotes, score, total_votes }, { new: true });
 
