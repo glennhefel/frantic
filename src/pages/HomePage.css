@@ -47,9 +47,10 @@ body, .homepage-dark {
   display: inline-block;
   background-color: #ffc107;
   color: #212529;
-  padding: 0.35em 0.65em;
+  padding: 0.5rem 2rem; 
   border-radius: 0.25rem;
   font-weight: 600;
+  font-size: 1.2rem;
 }
 
 .comment-count-badge {

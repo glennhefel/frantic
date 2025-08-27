@@ -57,7 +57,7 @@ router.get('/search', async (req, res) => {
     
     res.json(results);
   } catch (err) {
-    console.error('Search error:', err);
+    
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -76,7 +76,7 @@ router.get('/:id', optionalAuthenticateToken, async (req, res) => {
       ? 0
       : reviews.reduce((sum, r) => sum + r.rating, 0) / total_votes;
 
-    // If user is authenticated, get their votes on these reviews
+    // Did they upvote or downvote (1 or -1)
     let reviewsWithUserVotes = reviews;
     if (req.user) {
       const userVotes = await ReviewVote.find({

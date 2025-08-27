@@ -1,0 +1,163 @@
+/* Professional Navbar Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.professional-navbar {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-brand-professional {
+  font-weight: 700;
+  font-size: 22px;
+  background: linear-gradient(45deg, #4dabf7, #74c0fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand-professional:hover {
+  transform: scale(1.05);
+}
+
+.nav-link-professional {
+  position: relative;
+  color: #e0e0e0 !important;
+  font-weight: 500;
+  padding: 8px 16px !important;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  text-decoration: none !important;
+}
+
+.nav-link-professional:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.nav-link-professional::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(45deg, #4dabf7, #74c0fc);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link-professional:hover::before {
+  width: 80%;
+}
+
+.search-container-professional {
+  position: relative;
+  max-width: 400px;
+  min-width: 300px;
+}
+
+.search-input-professional {
+  background: rgba(42, 42, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  border-radius: 25px !important;
+  padding: 8px 20px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px);
+}
+
+.search-input-professional:focus {
+  background: rgba(42, 42, 42, 1) !important;
+  border-color: #4dabf7 !important;
+  box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.1) !important;
+  outline: none !important;
+}
+
+.search-input-professional::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.search-button-professional {
+  background: linear-gradient(45deg, #4dabf7, #74c0fc) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 25px !important;
+  padding: 8px 16px !important;
+  transition: all 0.3s ease !important;
+  font-weight: 500 !important;
+}
+
+.search-button-professional:hover {
+  background: linear-gradient(45deg, #339af0, #4dabf7) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(77, 171, 247, 0.3);
+}
+
+.user-section-professional {
+  color: #e0e0e0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.username-link-professional {
+  color: #4dabf7 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  margin-left: 6px;
+}
+
+.username-link-professional:hover {
+  color: #74c0fc !important;
+  text-shadow: 0 0 8px rgba(77, 171, 247, 0.3);
+}
+
+.logout-button-professional {
+  background: linear-gradient(45deg, #dc3545, #e35d6a) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 20px !important;
+  padding: 6px 18px !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+}
+
+.logout-button-professional:hover {
+  background: linear-gradient(45deg, #c82333, #dc3545) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  color: white !important;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .search-container-professional {
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-brand-professional {
+    font-size: 18px;
+  }
+  
+  .search-container-professional {
+    min-width: 150px;
+  }
+  
+  .nav-link-professional {
+    padding: 6px 12px !important;
+    font-size: 13px;
+  }
+}

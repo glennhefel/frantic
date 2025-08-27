@@ -26,6 +26,7 @@ function LoginForm() {
       alert('Login successful!');
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('username', form.username || form.name);
+      localStorage.setItem('email', user.email);
       localStorage.setItem('userId', user._id);
       
 

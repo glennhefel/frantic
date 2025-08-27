@@ -53,11 +53,11 @@ function HomePage() {
                       {item.title}
                     </h5>
                     <div className="text-center mt-2">
-                      <span className="rating-badge">
-                        ★ {item.average_rating?.toFixed(1) || 'N/A'}
-                      </span>
+                     <span className="rating-badge" style={{ fontSize: '1.5rem', padding: '0.6rem 1.2rem' }}>
+                   ★ {item.average_rating?.toFixed(1) || 'N/A'}
+                    </span>
                     </div>
-                    <div className="text-center mt-2">
+                    <div className="text-center mt-3">
                       <span className="comment-count-badge">
                         Reviews: {item.total_votes || 0}
                       </span>

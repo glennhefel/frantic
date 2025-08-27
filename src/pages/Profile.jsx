@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavBar from './navbar';
 import './Profile.css';
 
@@ -15,6 +15,7 @@ function safeDecodeToken(token) {
 }
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [usernameInput, setUsernameInput] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -38,7 +39,7 @@ export default function Profile() {
       return;
     }
 
-    // Try to fetch current user data
+    // 
     (async () => {
       try {
         const res = await fetch('http://localhost:5000/users/me', {
@@ -55,11 +56,12 @@ export default function Profile() {
         setUsernameInput(userData?.username || '');
       } catch (err) {
         console.error('Failed to fetch user:', err);
-        // Fallback to token data
+        // fallback for email
+        const storedEmail = localStorage.getItem('email');
         const fallbackUser = decoded ? { 
           _id: decoded.id || decoded._id, 
           username: decoded.username, 
-          email: decoded.email 
+          email: decoded.email || storedEmail
         } : null;
         setUser(fallbackUser);
         setUsernameInput(fallbackUser?.username || '');
@@ -94,7 +96,12 @@ export default function Profile() {
       const data = await res.json();
       const updatedUser = data.user || data;
       setUser(prev => ({ ...prev, ...updatedUser }));
+      
+      // Also update localStorage username
+      localStorage.setItem('username', updatedUser.username);
+      
       alert('Username updated successfully!');
+      navigate('/');
     } catch (err) {
       console.error('Username update error:', err);
       alert('Failed to update username: ' + err.message);
@@ -127,6 +134,7 @@ export default function Profile() {
 
       setNewPassword('');
       alert('Password updated successfully!');
+      navigate('/');
     } catch (err) {
       console.error('Password update error:', err);
       alert('Failed to update password: ' + err.message);
@@ -168,7 +176,7 @@ export default function Profile() {
               <img src={user.avatar || '/logo192.png'} alt="avatar" className="profile-avatar" />
               <div>
                 <h3 className="mb-0">{user.username || 'Unknown'}</h3>
-                <div className="mb-2">{user.email || ''}</div>
+                <div className="mb-muted">{user.email || localStorage.getItem('email') || 'No email found'}</div>
               </div>
             </div>
 
@@ -181,7 +189,7 @@ export default function Profile() {
                   disabled={saving}
                   placeholder="New username"
                 />
-                <button className="btn btn-sm btn-primary" disabled={saving} type="submit">
+                <button className="btn btn-outline-primary btn-sm" disabled={saving} type="submit">
                   {saving ? 'Saving...' : 'Save'}
                 </button>
               </form>
@@ -197,7 +205,7 @@ export default function Profile() {
                   disabled={saving}
                   placeholder="New password"
                 />
-                <button className="btn btn-sm btn-warning" disabled={saving} type="submit">
+                <button className="btn btn-outline-warning btn-sm" disabled={saving} type="submit">
                   {saving ? 'Saving...' : 'Change password'}
                 </button>
               </form>

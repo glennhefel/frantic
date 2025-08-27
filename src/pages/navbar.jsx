@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import '../components/navbar.css';
 
 function NavBar() {
   const username = localStorage.getItem('username');
@@ -10,36 +11,71 @@ function NavBar() {
     e.preventDefault(); 
     const q = search.trim();
     if (!q) return;
-    // console.log('Search submitted:', q);
     navigate(`/search?q=${encodeURIComponent(q)}`);
     setSearch('');
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-      <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-        <li className="nav-item"><Link className="nav-link" to="/home">Home</Link></li>
-        <li className="nav-item"><Link className="nav-link" to="/top100">🏆 Top 100</Link></li>
-        <li className="nav-item"><Link className="nav-link" to="/addmedia">➕ Add Media</Link></li>
-        <li className="nav-item"><Link className="nav-link" to="/watchlist">👤 Watch List</Link></li>
+    <nav className="navbar navbar-expand-lg navbar-dark px-4 py-2 professional-navbar">
+      <div className="container-fluid">
+        
+        <Link className="navbar-brand navbar-brand-professional" to="/home">
+          🎬 VoidRift
+        </Link>
 
-      </ul>
+        {/* Navigation Links */}
+        <ul className="navbar-nav me-auto mb-0" style={{ gap: '0.5rem' }}>
+          <li className="nav-item">
+            <Link className="nav-link nav-link-professional" to="/home">
+               Home
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link nav-link-professional" to="/top100">
+               Top 100
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link nav-link-professional" to="/addmedia">
+               Add Media
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link nav-link-professional" to="/watchlist">
+               Watchlist
+            </Link>
+          </li>
+        </ul>
 
-      <form className="d-flex me-2" onSubmit={handleSearch}>
-        <input
-          className="form-control form-control-sm me-2"
-          type="search"
-          placeholder="Search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <button className="btn btn-outline-success btn-sm" type="submit">Search</button>
-      </form>
+        {/* Search Form */}
+        <form className="d-flex me-3 search-container-professional" onSubmit={handleSearch}>
+          <div className="input-group">
+            <input
+              className="form-control search-input-professional"
+              type="search"
+              placeholder="Search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            <button className="btn btn-outline-success btn-sm " type="submit">
+                 Search 
+            </button>
+          </div>
+        </form>
 
-      <div className="navbar-text me-2 text-light">
-        Welcome, <Link className="nav-link d-inline" to="/profile">{username || "Guest"}</Link>
+        {/* User Section */}
+        <div className="d-flex align-items-center" style={{ gap: '12px' }}>
+          <div className="user-section-professional">
+            Welcome,
+            <Link className="username-link-professional" to="/profile">
+              {username || "Guest"}
+            </Link>
+          </div>
+          <Link className="btn btn-outline-danger btn-sm" to="/">
+            Logout
+          </Link>
+        </div>
       </div>
-      <Link className="btn btn-warning btn-sm" to="/">Logout</Link>
     </nav>
   );
 }
