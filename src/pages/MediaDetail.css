@@ -200,7 +200,7 @@ body, html {
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #00051b;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
   background: rgba(70, 70, 70, 0.9);
 }
@@ -253,7 +253,7 @@ body, html {
 }
 
 .btn-submit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #01030e 0%, #0f041a 100%);
   border: none;
   color: #ffffff;
   padding: 0.75rem 1.5rem;
@@ -270,7 +270,7 @@ body, html {
 }
 
 .btn-submit:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #dde00d 0%, #bb6d15 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
@@ -322,7 +322,7 @@ body, html {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #06091a 0%, #140524 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -356,7 +356,7 @@ body, html {
 
 .no-reviews {
   text-align: center;
-  padding: 3rem 2rem; /* Increase horizontal padding */
+  padding: 3rem 2rem; 
   color: #b0b3b8;
 }
 
@@ -368,7 +368,7 @@ body, html {
 
 /* Review Card */
 .review-card {
-  padding: 1.5rem 2rem; /* Match movie container padding */
+  padding: 1.5rem 2rem; 
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s ease;
 }
@@ -400,7 +400,7 @@ body, html {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #c9a222 0%, #000000 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -566,4 +566,28 @@ body, html {
   .vote-section {
     flex-wrap: wrap;
   }
+}
+
+/* Delete Review Button */
+.delete-review-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #dc3545;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+
+.delete-review-btn:hover {
+  background: #dc3545;
+  color: white;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.delete-review-btn:active {
+  transform: scale(0.95);
 }

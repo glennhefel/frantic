@@ -1,12 +1,15 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import Media from '../models/media.model.js';
+import MediaRequest from '../models/mediaRequest.model.js';
 import Rating from '../models/review.model.js';
 import ReviewVote from '../models/reviewVote.model.js'; // Add this import
 import { authenticateToken } from '../middleware/authi.js';
 import { optionalAuthenticateToken } from '../middleware/optionalAuth.js';
 import { voteOnReview } from '../controllers/reviewVoteController.js';
 import { isAdmin } from '../middleware/isAdmin.js';
+
+
 
 const router = express.Router();
 
@@ -62,6 +65,123 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// ======================
+// MEDIA REQUEST ROUTES (must come before /:id route)
+// ======================
+
+// Request new media (Any authenticated user)
+router.post('/request', authenticateToken, async (req, res) => {
+  try {
+    console.log('Creating media request:', req.body); // Debug log
+    console.log('User ID:', req.user.id); // Debug log
+    
+    const mediaRequest = new MediaRequest({
+      ...req.body,
+      requestedBy: req.user.id
+    });
+    
+    const savedRequest = await mediaRequest.save();
+    console.log('Saved request:', savedRequest); // Debug log
+    
+    res.json({ message: 'Media request submitted!', request: savedRequest });
+  } catch (err) {
+    console.error('Error creating request:', err); // Debug log
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Debug route to check if requests exist in DB (remove this after debugging)
+router.get('/debug/requests', async (req, res) => {
+  try {
+    const allRequests = await MediaRequest.find();
+    res.json({
+      count: allRequests.length,
+      requests: allRequests
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get requests (Admin only)
+router.get('/requests', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    console.log('Admin fetching requests...'); // Debug log
+    console.log('User making request:', req.user); // Debug log
+    
+    const requests = await MediaRequest.find()
+      .populate('requestedBy', 'username')
+      .populate('reviewedBy', 'username')
+      .sort({ createdAt: -1 });
+    
+    console.log('Found requests:', requests.length); // Debug log
+    console.log('Requests data:', requests); // Debug log
+    
+    res.json(requests);
+  } catch (err) {
+    console.error('Error fetching requests:', err); // Debug log
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Approve media request (Admin only)
+router.post('/requests/:requestId/approve', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const request = await MediaRequest.findById(req.params.requestId);
+    if (!request) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // Create the media from the request
+    const newMedia = new Media({
+      title: request.title,
+      release_date: request.release_date,
+      media: request.media,
+      genre: request.genre,
+      director: request.director,
+      description: request.description,
+      poster: request.poster
+    });
+
+    await newMedia.save();
+
+    // Update request status
+    request.status = 'approved';
+    request.reviewedAt = new Date();
+    request.reviewedBy = req.user.id;
+    request.adminNotes = req.body.adminNotes || '';
+    await request.save();
+
+    res.json({ message: 'Request approved and media added!', media: newMedia });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reject media request (Admin only)
+router.post('/requests/:requestId/reject', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const request = await MediaRequest.findById(req.params.requestId);
+    if (!request) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    request.status = 'rejected';
+    request.reviewedAt = new Date();
+    request.reviewedBy = req.user.id;
+    request.adminNotes = req.body.adminNotes || '';
+    await request.save();
+
+    res.json({ message: 'Request rejected' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ======================
+// END MEDIA REQUEST ROUTES
+// ======================
+
 // Get a single media by ID 
 router.get('/:id', optionalAuthenticateToken, async (req, res) => {
 
@@ -104,8 +224,8 @@ router.get('/:id', optionalAuthenticateToken, async (req, res) => {
   }
 });
 
-// Add new media
-router.post('/add', async (req, res) => {
+
+router.post('/add', authenticateToken, isAdmin, async (req, res) => {
   try {
     const newMedia = new Media(req.body);
     await newMedia.save();

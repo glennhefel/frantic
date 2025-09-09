@@ -8,6 +8,9 @@ import AddMediaForm from './pages/addmedia';
 import SearchResults from './pages/SearchResults';
 import Profile from './pages/Profile';
 import WatchlistPage from './pages/Watchlist';
+import UserReviews from './pages/UserReviews';
+import UserDiscussions from './pages/UserDiscussions';
+import AdminRequests from './pages/AdminRequests';
 import './App.css';
 
 function App() {
@@ -23,6 +26,9 @@ function App() {
             <Route path="/addmedia" element={<AddMediaForm />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/reviews" element={<UserReviews />} />
+            <Route path="/profile/discussions" element={<UserDiscussions />} />
+            <Route path="/admin/requests" element={<AdminRequests />} />
             <Route path="/users/:id" element={<Profile />} />
             <Route path="/watchlist" element={<WatchlistPage />} />
           </Routes>

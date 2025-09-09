@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { jwtDecode } from "jwt-decode";
 import NavBar from './navbar';
 import './addmedia.css';
 
@@ -14,6 +15,20 @@ function AddMediaForm() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if user is admin
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setIsAdmin(decoded.isAdmin || false);
+      } catch (e) {
+        setIsAdmin(false);
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,17 +38,35 @@ function AddMediaForm() {
     e.preventDefault();
     setLoading(true);
     
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to add media');
+      setLoading(false);
+      return;
+    }
+    
     try {
-      const res = await fetch('http://localhost:5000/media/add', {
+      const endpoint = isAdmin 
+        ? 'http://localhost:5000/media/add' 
+        : 'http://localhost:5000/media/request';
+      
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(form),
       });
       
-      if (!res.ok) throw new Error('Failed to add media');
+      if (!res.ok) throw new Error('Failed to submit request');
       
-      // Success feedback
-      alert('✅ Media added successfully!');
+      // Different success messages based on admin status
+      if (isAdmin) {
+        alert(' Media added successfully!');
+      } else {
+        alert('Media request submitted! An admin will review it shortly.');
+      }
       
       // Reset form
       setForm({
@@ -46,7 +79,7 @@ function AddMediaForm() {
         poster: '',
       });
     } catch (err) {
-      alert('❌ Error: ' + err.message);
+      alert('Error: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -62,8 +95,20 @@ function AddMediaForm() {
             {/* Header Section */}
             <div className="add-media-header">
               <div className="header-icon">🎬</div>
-              <h1 className="header-title">Add New Media</h1>
-              <p className="header-subtitle">Share your favorite content with the community</p>
+              <h1 className="header-title">
+                {isAdmin ? 'Add New Media' : 'Request New Media'}
+              </h1>
+              <p className="header-subtitle">
+                {isAdmin 
+                  ? 'Add content directly to the database' 
+                  : 'Submit a request for admin approval'}
+              </p>
+              {!isAdmin && (
+                <div className="info-banner">
+                  <span className="info-icon">ℹ️</span>
+                  Your request will be reviewed by an admin before being added to the site.
+                </div>
+              )}
             </div>
 
             {/* Form Section */}
@@ -119,9 +164,9 @@ function AddMediaForm() {
                     disabled={loading}
                   >
                     <option value="">Select media type</option>
-                    <option value="Anime">🌸 Anime</option>
-                    <option value="Movies">🎬 Movies</option>
-                    <option value="TV_series">📺 TV Series</option>
+                    <option value="Anime"> Anime</option>
+                    <option value="Movies"> Movies</option>
+                    <option value="TV_series"> TV Series</option>
                   </select>
                 </div>
 
@@ -219,12 +264,12 @@ function AddMediaForm() {
                   {loading ? (
                     <>
                       <span className="spinner"></span>
-                      Adding...
+                      {isAdmin ? 'Adding...' : 'Submitting...'}
                     </>
                   ) : (
                     <>
                       <span className="btn-icon"></span>
-                      Add Media
+                      {isAdmin ? 'Add Media' : 'Submit Request'}
                     </>
                   )}
                 </button>

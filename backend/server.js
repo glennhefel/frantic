@@ -13,6 +13,7 @@ import usersRouter from './routes/users.js';
 import mediaRouter from './routes/media.js';
 import ratingRoutes from './routes/ratings.js';
 import authRoutes from "./routes/auth.js";
+import discussionsRouter from './routes/discussions.js';
 
 
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/users', usersRouter);
 app.use('/media', mediaRouter);
 app.use('/ratings', ratingRoutes);
 app.use("/auth", authRoutes);
+app.use('/media', discussionsRouter);
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

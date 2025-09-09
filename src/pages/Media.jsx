@@ -1,17 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import './MediaDetail.css';
 import { jwtDecode } from "jwt-decode";
 import NavBar from './navbar';
+import Discussion from '../components/Discussion';
 
 function MediaDetail() {
   const { id } = useParams();
   const [media, setMedia] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showDiscussion, setShowDiscussion] = useState(false);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
   const userId = localStorage.getItem('userId');
   const userReviewed = reviews.find(r => r.user && (r.user._id === userId || r.user.id === userId));
   
+  const checkWatchlistStatus = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const res = await fetch('http://localhost:5000/users/me/watchlist', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        const isInList = data.some(item => {
+          const mediaId = item.media?._id || item.media?.id || item.media;
+          return String(mediaId) === String(id);
+        });
+        setIsInWatchlist(isInList);
+      }
+    } catch (err) {
+      console.error('Error checking watchlist status:', err);
+    }
+  }, [id]);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -26,9 +52,66 @@ function MediaDetail() {
         setReviews(data.reviews || []);
       })
       .catch(() => setMedia(null));
-  }, [id]);
 
-  // Admin check   
+    // Check if media is in watchlist
+    if (token) {
+      checkWatchlistStatus();
+    }
+  }, [id, checkWatchlistStatus]);
+
+  const toggleWatchlist = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to manage your watchlist.');
+      return;
+    }
+
+    setWatchlistLoading(true);
+
+    try {
+      if (isInWatchlist) {
+        // Remove from watchlist
+        const res = await fetch(`http://localhost:5000/users/me/watchlist/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.ok) {
+          setIsInWatchlist(false);
+        } else {
+          alert('Failed to remove from watchlist');
+        }
+      } else {
+        // Add to watchlist
+        const res = await fetch('http://localhost:5000/users/me/watchlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ mediaId: id }),
+        });
+
+        if (res.ok) {
+          setIsInWatchlist(true);
+        } else {
+          const error = await res.json();
+          if (error.message === 'Already in watchlist') {
+            setIsInWatchlist(true);
+          } else {
+            alert('Failed to add to watchlist');
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling watchlist:', err);
+      alert('Failed to update watchlist');
+    } finally {
+      setWatchlistLoading(false);
+    }
+  };
+
+  
   const token = localStorage.getItem('token');
   let isAdmin = false;
   if (token) {
@@ -97,6 +180,58 @@ function MediaDetail() {
     }
   };
 
+  const deleteReview = async (reviewId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to delete reviews.');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this review?')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/ratings/reviews/${reviewId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        alert('Failed to delete review.');
+        return;
+      }
+
+      // Refresh media data
+      const mediaRes = await fetch(`http://localhost:5000/media/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (mediaRes.ok) {
+        const data = await mediaRes.json();
+        setMedia(data);
+        setReviews(data.reviews || []);
+      }
+
+      alert('Review deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting review:', err);
+      alert('Failed to delete review.');
+    }
+  };
+  //TIME
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return date.toLocaleDateString();
+  };
+
   const handleUpvote = (reviewId) => sendReviewVote(reviewId, 1);
   const handleDownvote = (reviewId) => sendReviewVote(reviewId, -1);
 
@@ -123,10 +258,34 @@ function MediaDetail() {
             </div>
             
             {isAdmin && (
-              <button onClick={handleDelete} className="btn btn-danger btn-sm mb-3 px-3 py-2 rounded">
+              <button onClick={handleDelete} className="btn btn-danger btn-sm mb-3 px-3 py-2 rounded me-2">
                 Delete
               </button>
             )}
+
+            <button 
+              onClick={toggleWatchlist} 
+              disabled={watchlistLoading}
+              className={`btn btn-sm mb-3 px-3 py-2 rounded me-2 ${
+                isInWatchlist 
+                  ? 'btn btn-outline-warning' 
+                  : 'btn btn-outline-success'
+              }`}
+            >
+              {watchlistLoading 
+                ? 'Loading...' 
+                : isInWatchlist 
+                  ? '📺 In Watchlist' 
+                  : '+ Add to Watchlist'
+              }
+            </button>
+
+            <button 
+              onClick={() => setShowDiscussion(true)}
+              className="btn btn-outline-info btn-sm mb-3 px-3 py-2 rounded me-2"
+            >
+              💬 Discuss
+            </button>
 
             {userReviewed ? (
               <button onClick={() => setShowModal(true)}
@@ -192,10 +351,21 @@ function MediaDetail() {
                           <span className="rating-badge">
                             ⭐ {review.rating}/10
                           </span>
-                          <span className="review-time">• Just now</span>
+                          <span className="review-time">• {formatTime(review.createdAt)}</span>
                         </div>
                       </div>
                     </div>
+                    
+                    
+                    {(review.user._id === userId || review.user.id === userId) && (
+                      <button 
+                        onClick={() => deleteReview(review._id)}
+                        className="delete-review-btn"
+                        title="Delete review"
+                      >
+                        🗑️
+                      </button>
+                    )}
                   </div>
 
                   {/* Review Content */}
@@ -347,6 +517,13 @@ function MediaDetail() {
             </div>
           </div>
         )}
+
+        {/* Discussion Modal */}
+        <Discussion 
+          mediaId={id}
+          isOpen={showDiscussion}
+          onClose={() => setShowDiscussion(false)}
+        />
       </div>
     </>
   );

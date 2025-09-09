@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import NavBar from './navbar';
 import './Profile.css';
 
@@ -25,13 +25,13 @@ export default function Profile() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     
-    // If no token at all, show login message
+    
     if (!token) {
       setLoading(false);
       return;
     }
 
-    // Try to fetch user data from API
+ 
     const fetchUser = async () => {
       try {
         const res = await fetch('http://localhost:5000/users/me', {
@@ -49,7 +49,7 @@ export default function Profile() {
       } catch (err) {
         console.error('Failed to fetch user:', err);
         
-        // If API fails, try to use decoded token 
+        
         const decoded = safeDecodeToken(token);
         if (decoded) {
           const fallbackUser = { 
@@ -60,7 +60,7 @@ export default function Profile() {
           setUser(fallbackUser);
           setUsernameInput(fallbackUser.username || '');
         } else {
-          // If invalid, clear it and show login
+          // If invalid, clear all
           localStorage.removeItem('token');
           localStorage.removeItem('username');
           localStorage.removeItem('email');
@@ -209,6 +209,22 @@ export default function Profile() {
                   {saving ? 'Saving...' : 'Change password'}
                 </button>
               </form>
+            </div>
+
+            
+            <div className="profile-navigation mb-4">
+              <h5 className="mb-3">Your Activity</h5>
+              <div className="d-flex flex-wrap gap-3">
+                <Link to="/watchlist" className="btn btn-outline-success btn-sm">
+                  📺 View Watchlist
+                </Link>
+                <Link to="/profile/reviews" className="btn btn-outline-primary btn-sm">
+                  ⭐ My Reviews
+                </Link>
+                <Link to="/profile/discussions" className="btn btn-outline-info btn-sm">
+                  💬 Discussion History
+                </Link>
+              </div>
             </div>
           </div>
         </div>

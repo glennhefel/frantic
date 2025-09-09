@@ -1,5 +1,6 @@
 import express from 'express';
 import Rating from '../models/review.model.js';
+import ReviewVote from '../models/reviewVote.model.js';
 //import Media from '../models/media.model.js';
 //import User from '../models/user.model.js'; 
 import { voteOnReview } from '../controllers/reviewVoteController.js';
@@ -54,6 +55,33 @@ router.post('/:mediaId', async (req, res) => {
 
 // POST /api/ratings/reviews/:reviewId/vote
 router.post('/reviews/:reviewId/vote', authenticateToken, voteOnReview);
+
+// DELETE /api/ratings/reviews/:reviewId - Delete a review
+router.delete('/reviews/:reviewId', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const reviewId = req.params.reviewId;
+    
+    // Find the review
+    const review = await Rating.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+    
+    // Check if the user owns this review
+    if (review.user.toString() !== userId) {
+      return res.status(403).json({ error: 'You can only delete your own reviews' });
+    }
+    
+    // Delete the review
+    await Rating.findByIdAndDelete(reviewId);
+    
+    res.json({ message: 'Review deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting review:', err);
+    res.status(500).json({ error: 'Failed to delete review' });
+  }
+});
 
 router.get('/reviews/:reviewId/user-vote', authenticateToken, async (req, res) => {
   try {
