@@ -53,10 +53,10 @@ function SignupForm() {
   return (
     <form onSubmit={handleSubmit}>
       <InputField
-        label="Full Name"
+        label="Username"
         type="text"
         name="name"
-        placeholder="Full Name"
+        placeholder="Username"
         value={form.name}
         onChange={handleChange}
         required

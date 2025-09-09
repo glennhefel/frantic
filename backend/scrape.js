@@ -38,7 +38,7 @@ async function scrapeAnimeById(animeId) {
 }
 
 // Example: scrape top 10 anime from MyAnimeList
-async function scrapeTopAnime(limit = 10) {
+async function scrapeTopAnime(limit = 100) {
   const { data } = await axios.get(`https://api.jikan.moe/v4/top/anime?limit=${limit}`);
   const animeList = data.data;
   for (const anime of animeList) {

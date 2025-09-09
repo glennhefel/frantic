@@ -65,9 +65,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// ======================
-// MEDIA REQUEST ROUTES (must come before /:id route)
-// ======================
+
 
 // Request new media (Any authenticated user)
 router.post('/request', authenticateToken, async (req, res) => {
@@ -103,7 +101,7 @@ router.get('/debug/requests', async (req, res) => {
   }
 });
 
-// Get requests (Admin only)
+
 router.get('/requests', authenticateToken, isAdmin, async (req, res) => {
   try {
     console.log('Admin fetching requests...'); // Debug log
@@ -124,7 +122,7 @@ router.get('/requests', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Approve media request (Admin only)
+
 router.post('/requests/:requestId/approve', authenticateToken, isAdmin, async (req, res) => {
   try {
     const request = await MediaRequest.findById(req.params.requestId);
@@ -132,7 +130,7 @@ router.post('/requests/:requestId/approve', authenticateToken, isAdmin, async (r
       return res.status(404).json({ error: 'Request not found' });
     }
 
-    // Create the media from the request
+  
     const newMedia = new Media({
       title: request.title,
       release_date: request.release_date,
@@ -145,7 +143,7 @@ router.post('/requests/:requestId/approve', authenticateToken, isAdmin, async (r
 
     await newMedia.save();
 
-    // Update request status
+   
     request.status = 'approved';
     request.reviewedAt = new Date();
     request.reviewedBy = req.user.id;
@@ -158,7 +156,7 @@ router.post('/requests/:requestId/approve', authenticateToken, isAdmin, async (r
   }
 });
 
-// Reject media request (Admin only)
+
 router.post('/requests/:requestId/reject', authenticateToken, isAdmin, async (req, res) => {
   try {
     const request = await MediaRequest.findById(req.params.requestId);
@@ -178,9 +176,6 @@ router.post('/requests/:requestId/reject', authenticateToken, isAdmin, async (re
   }
 });
 
-// ======================
-// END MEDIA REQUEST ROUTES
-// ======================
 
 // Get a single media by ID 
 router.get('/:id', optionalAuthenticateToken, async (req, res) => {
@@ -230,6 +225,33 @@ router.post('/add', authenticateToken, isAdmin, async (req, res) => {
     const newMedia = new Media(req.body);
     await newMedia.save();
     res.json({ message: 'Media added!', media: newMedia });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Update media (admin only)
+router.put('/:id', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const { title, director, genre, description, poster } = req.body;
+    
+    const updatedMedia = await Media.findByIdAndUpdate(
+      req.params.id,
+      {
+        title,
+        director,
+        genre,
+        description,
+        poster
+      },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedMedia) {
+      return res.status(404).json({ error: 'Media not found' });
+    }
+    
+    res.json(updatedMedia);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

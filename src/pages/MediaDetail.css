@@ -68,6 +68,65 @@ body, html {
   color: #eee;
 }
 
+.movie-details {
+  position: relative;
+  flex: 1;
+}
+
+.delete-media-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.delete-media-btn:hover {
+  background: #dc3545;
+  color: white;
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.delete-media-btn:active {
+  transform: scale(0.95);
+}
+
+.edit-media-btn {
+  position: absolute;
+  top: 10px;
+  right: 60px;
+  background: transparent;
+  border: 1px solid #28a745;
+  color: #28a745;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.edit-media-btn:hover {
+  background: #28a745;
+  color: white;
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.edit-media-btn:active {
+  transform: scale(0.95);
+}
+
 .movie-description p {
   line-height: 1.6;
   color: #ccc;
@@ -279,6 +338,36 @@ body, html {
   font-size: 1rem;
 }
 
+/* Edit Media Modal */
+.edit-media-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.image-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.image-preview {
+  width: 150px;
+  height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
 
 .reviews-section {
   max-width: 1400px;    
@@ -368,6 +457,7 @@ body, html {
 
 /* Review Card */
 .review-card {
+  position: relative;
   padding: 1.5rem 2rem; 
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s ease;
@@ -527,7 +617,7 @@ body, html {
   .reviews-section {
     margin: 1rem;
     border-radius: 8px;
-    width: calc(100vw - 2rem); /* Account for margins */
+    width: calc(100vw - 2rem); 
   }
   
   .reviews-header {
@@ -570,6 +660,9 @@ body, html {
 
 /* Delete Review Button */
 .delete-review-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
   background: none;
   border: none;
   font-size: 1.2rem;
@@ -579,6 +672,7 @@ body, html {
   border-radius: 4px;
   transition: all 0.2s;
   opacity: 0.7;
+  z-index: 1;
 }
 
 .delete-review-btn:hover {

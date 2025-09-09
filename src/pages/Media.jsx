@@ -11,6 +11,7 @@ function MediaDetail() {
   const [reviews, setReviews] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDiscussion, setShowDiscussion] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
   const userId = localStorage.getItem('userId');
@@ -144,6 +145,32 @@ function MediaDetail() {
     }
   };
 
+  const handleEdit = async (editData) => {
+    try {
+      const res = await fetch(`http://localhost:5000/media/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify(editData)
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to update media');
+      }
+
+      const updatedMedia = await res.json();
+      setMedia(updatedMedia);
+      setShowEditModal(false);
+      alert('Media updated successfully!');
+    } catch (err) {
+      console.error('Error updating media:', err);
+      alert('Failed to update media: ' + err.message);
+    }
+  };
+
   const sendReviewVote = async (reviewId, value) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -258,9 +285,14 @@ function MediaDetail() {
             </div>
             
             {isAdmin && (
-              <button onClick={handleDelete} className="btn btn-danger btn-sm mb-3 px-3 py-2 rounded me-2">
-                Delete
-              </button>
+              <>
+                <button onClick={() => setShowEditModal(true)} className="edit-media-btn" title="Edit media">
+                  Edit
+                </button>
+                <button onClick={handleDelete} className="delete-media-btn" title="Delete media">
+                  ×
+                </button>
+              </>
             )}
 
             <button 
@@ -307,7 +339,7 @@ function MediaDetail() {
           </div>
         </div>
 
-        {/* Reviews Section */}
+        {/* Reviews*/}
         <div className="reviews-section">
           <div className="reviews-header">
             <h4 className="reviews-title">
@@ -339,7 +371,7 @@ function MediaDetail() {
             ) : (
               reviews.map((review) => (
                 <div key={review.id} className="review-card">
-                  {/* Review Header */}
+                
                   <div className="review-header">
                     <div className="review-user-info">
                       <div className="user-avatar">
@@ -432,7 +464,7 @@ function MediaDetail() {
                 </button>
               </div>
 
-              {/* Modal Form */}
+              
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 const rating = e.target.rating.value;
@@ -465,7 +497,7 @@ function MediaDetail() {
                 }
               }}>
                 
-                {/* Rating Section */}
+               
                 <div className="form-group">
                   <label className="form-label">
                     <span className="label-icon">⭐</span>
@@ -485,7 +517,7 @@ function MediaDetail() {
                   </select>
                 </div>
 
-                {/* Comment Section */}
+                
                 <div className="form-group">
                   <label className="form-label">
                     <span className="label-icon">💭</span>
@@ -499,7 +531,7 @@ function MediaDetail() {
                   ></textarea>
                 </div>
 
-                {/* Modal Actions */}
+               
                 <div className="modal-actions">
                   <button
                     type="button"
@@ -518,12 +550,152 @@ function MediaDetail() {
           </div>
         )}
 
-        {/* Discussion Modal */}
+       
         <Discussion 
           mediaId={id}
           isOpen={showDiscussion}
           onClose={() => setShowDiscussion(false)}
         />
+
+       
+        {showEditModal && (
+          <div className="edit-media-modal">
+            <div className="modal-content-box">
+          
+              <div className="modal-header">
+                <h3 className="modal-title">
+                  <span className="modal-icon"></span>
+                  Edit Media
+                </h3>
+                <button 
+                  className="modal-close-btn"
+                  onClick={() => setShowEditModal(false)}
+                  type="button"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Edit Form */}
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = {
+                  title: e.target.title.value,
+                  director: e.target.director.value,
+                  genre: e.target.genre.value,
+                  description: e.target.description.value,
+                  poster: e.target.poster.value,
+                };
+                await handleEdit(formData);
+              }}>
+                
+                
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon"></span>
+                    Title
+                  </label>
+                  <input
+                    name="title"
+                    type="text"
+                    required
+                    defaultValue={media.title}
+                    className="form-control"
+                    placeholder="Enter movie/TV show title"
+                  />
+                </div>
+
+                
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon"></span>
+                    Director
+                  </label>
+                  <input
+                    name="director"
+                    type="text"
+                    required
+                    defaultValue={media.director}
+                    className="form-control"
+                    placeholder="Enter director name"
+                  />
+                </div>
+
+                
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon"></span>
+                    Genre
+                  </label>
+                  <input
+                    name="genre"
+                    type="text"
+                    required
+                    defaultValue={media.genre}
+                    className="form-control"
+                    placeholder="Enter genre (e.g., Action, Comedy, Drama)"
+                  />
+                </div>
+
+               
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon"></span>
+                    Poster URL
+                  </label>
+                  <div className="image-input-group">
+                    <input
+                      name="poster"
+                      type="url"
+                      required
+                      defaultValue={media.poster}
+                      className="form-control"
+                      placeholder="Enter poster image URL"
+                    />
+                    {media.poster && (
+                      <img 
+                        src={media.poster} 
+                        alt="Current poster" 
+                        className="image-preview"
+                      />
+                    )}
+                  </div>
+                </div>
+
+               
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon"></span>
+                    Synopsis
+                  </label>
+                  <textarea
+                    name="description"
+                    rows="4"
+                    required
+                    defaultValue={media.description}
+                    className="form-control comment-textarea"
+                    placeholder="Enter movie/TV show synopsis"
+                  ></textarea>
+                </div>
+
+               
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="btn-cancel"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-submit">
+                    <span className="btn-icon"></span>
+                    Update Media
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
