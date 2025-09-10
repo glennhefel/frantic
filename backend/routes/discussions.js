@@ -4,13 +4,13 @@ import { authenticateToken } from '../middleware/authi.js';
 
 const router = Router();
 
-// GET discussions for a specific media
+
 router.get('/:mediaId/discussions', async (req, res) => {
   try {
     const { mediaId } = req.params;
     const discussions = await Discussion.find({ media: mediaId })
       .populate('user', 'username')
-      .sort({ createdAt: 1 }); // Oldest first for chat-like experience
+      .sort({ createdAt: 1 }); 
     
     res.json(discussions);
   } catch (err) {
@@ -18,7 +18,7 @@ router.get('/:mediaId/discussions', async (req, res) => {
   }
 });
 
-// POST a new discussion message
+
 router.post('/:mediaId/discussions', authenticateToken, async (req, res) => {
   try {
     const { mediaId } = req.params;
@@ -40,7 +40,7 @@ router.post('/:mediaId/discussions', authenticateToken, async (req, res) => {
 
     await discussion.save();
     
-    // Populate user info before sending back
+  
     await discussion.populate('user', 'username');
     
     res.status(201).json(discussion);
@@ -49,7 +49,7 @@ router.post('/:mediaId/discussions', authenticateToken, async (req, res) => {
   }
 });
 
-// PUT edit a discussion message (only by the author)
+
 router.put('/discussions/:discussionId', authenticateToken, async (req, res) => {
   try {
     const { discussionId } = req.params;
@@ -69,7 +69,7 @@ router.put('/discussions/:discussionId', authenticateToken, async (req, res) => 
       return res.status(404).json({ error: 'Discussion not found' });
     }
 
-    // Check if user owns this discussion
+    
     if (String(discussion.user) !== String(req.user.id)) {
       return res.status(403).json({ error: 'Not authorized to edit this message' });
     }
@@ -87,7 +87,7 @@ router.put('/discussions/:discussionId', authenticateToken, async (req, res) => 
   }
 });
 
-// DELETE a discussion message (only by the author or admin)
+
 router.delete('/discussions/:discussionId', authenticateToken, async (req, res) => {
   try {
     const { discussionId } = req.params;
@@ -98,7 +98,7 @@ router.delete('/discussions/:discussionId', authenticateToken, async (req, res) 
       return res.status(404).json({ error: 'Discussion not found' });
     }
 
-    // Check if user owns this discussion or is admin
+   
     const isOwner = String(discussion.user) === String(req.user.id);
     const isAdmin = req.user.isAdmin;
     

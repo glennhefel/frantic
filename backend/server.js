@@ -1,9 +1,3 @@
-// server.js is the entry point of the backend application.
-// It sets up and starts the Express server, connects to the MongoDB database,
-// and configures middleware and API routes. This file is needed to initialize
-// the backend, handle HTTP requests, and serve as the main controller for the app.
-
-// Import required modules
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';

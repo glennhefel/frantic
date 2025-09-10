@@ -94,12 +94,30 @@ router.patch('/me', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /users/me/watchlist
 router.get('/me/watchlist', authenticateToken, async (req, res) => {
   try {
-    const wl = await Watchlist.findOne({ user: req.user.id }).populate('items.media', 'title poster genre');
+    const wl = await Watchlist.findOne({ user: req.user.id }).populate('items.media', 'title poster genre media');
     if (!wl) return res.json([]);
-    return res.json(wl.items.map(i => ({ media: i.media, addedAt: i.addedAt })));
+    
+    // Get user's ratings 
+    const mediaIds = wl.items.map(i => i.media._id);
+    const userRatings = await Review.find({ 
+      user: req.user.id, 
+      media: { $in: mediaIds } 
+    }).select('media rating');
+    
+    // Create a map of mediaId -> rating for quick lookup
+    const ratingMap = {};
+    userRatings.forEach(rating => {
+      ratingMap[rating.media.toString()] = rating.rating;
+    });
+    
+    return res.json(wl.items.map(i => ({ 
+      media: i.media, 
+      addedAt: i.addedAt, 
+      status: i.status || 'plan_to_watch',
+      userRating: ratingMap[i.media._id.toString()] || null
+    })));
   } catch (err) {
     return res.status(500).json({ error: err.message || String(err) });
   }
@@ -139,6 +157,31 @@ router.delete('/me/watchlist/:mediaId', authenticateToken, async (req, res) => {
 
     await wl.save();
     return res.json({ message: 'Removed', mediaId });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || String(err) });
+  }
+});
+
+// PUT /users/me/watchlist/:mediaId/status - Update status of a watchlist item
+router.put('/me/watchlist/:mediaId/status', authenticateToken, async (req, res) => {
+  try {
+    const { mediaId } = req.params;
+    const { status } = req.body;
+    
+    if (!['watching', 'completed', 'dropped', 'plan_to_watch'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+    
+    const wl = await Watchlist.findOne({ user: req.user.id });
+    if (!wl) return res.status(404).json({ error: 'Watchlist not found' });
+    
+    const item = wl.items.find(item => String(item.media) === String(mediaId));
+    if (!item) return res.status(404).json({ error: 'Item not found in watchlist' });
+    
+    item.status = status;
+    await wl.save();
+    
+    return res.json({ message: 'Status updated', mediaId, status });
   } catch (err) {
     return res.status(500).json({ error: err.message || String(err) });
   }

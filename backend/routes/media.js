@@ -67,11 +67,11 @@ router.get('/search', async (req, res) => {
 
 
 
-// Request new media (Any authenticated user)
+// Request add media
 router.post('/request', authenticateToken, async (req, res) => {
   try {
-    console.log('Creating media request:', req.body); // Debug log
-    console.log('User ID:', req.user.id); // Debug log
+    console.log('Creating media request:', req.body); 
+    console.log('User ID:', req.user.id); 
     
     const mediaRequest = new MediaRequest({
       ...req.body,
@@ -79,16 +79,16 @@ router.post('/request', authenticateToken, async (req, res) => {
     });
     
     const savedRequest = await mediaRequest.save();
-    console.log('Saved request:', savedRequest); // Debug log
+    console.log('Saved request:', savedRequest); 
     
     res.json({ message: 'Media request submitted!', request: savedRequest });
   } catch (err) {
-    console.error('Error creating request:', err); // Debug log
+    console.error('Error creating request:', err); 
     res.status(400).json({ error: err.message });
   }
 });
 
-// Debug route to check if requests exist in DB (remove this after debugging)
+
 router.get('/debug/requests', async (req, res) => {
   try {
     const allRequests = await MediaRequest.find();
@@ -104,20 +104,20 @@ router.get('/debug/requests', async (req, res) => {
 
 router.get('/requests', authenticateToken, isAdmin, async (req, res) => {
   try {
-    console.log('Admin fetching requests...'); // Debug log
-    console.log('User making request:', req.user); // Debug log
+    console.log('Admin fetching requests...'); 
+    console.log('User making request:', req.user); 
     
     const requests = await MediaRequest.find()
       .populate('requestedBy', 'username')
       .populate('reviewedBy', 'username')
       .sort({ createdAt: -1 });
     
-    console.log('Found requests:', requests.length); // Debug log
-    console.log('Requests data:', requests); // Debug log
+    console.log('Found requests:', requests.length); 
+    console.log('Requests data:', requests); 
     
     res.json(requests);
   } catch (err) {
-    console.error('Error fetching requests:', err); // Debug log
+    console.error('Error fetching requests:', err); 
     res.status(500).json({ error: err.message });
   }
 });
@@ -230,7 +230,7 @@ router.post('/add', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Update media (admin only)
+// Update media 
 router.put('/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     const { title, director, genre, description, poster } = req.body;

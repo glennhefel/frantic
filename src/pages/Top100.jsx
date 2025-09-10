@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import './HomePage.css';
+import './Profile.css'; 
 import NavBar from './navbar';
 
 function Top100Page() {
@@ -29,56 +29,74 @@ function Top100Page() {
   }, []);
 
   return (
-    <div className="homepage-dark" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <>
       <NavBar />
+      <div className="homepage-dark" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="container py-4" style={{ flex: 1, maxWidth: '900px' }}>
+          <div className="watchlist-header mb-4">
+            <h2 className="mb-1">Top 100 List</h2>
+            <p className="text-muted">Highest rated movies, TV shows, and anime</p>
+          </div>
 
-      <div className="container mt-4 text-light" style={{ flex: 1 }}>
-        <h1 className="display-4 mb-4">Top 100 Rated</h1>
-        <hr className="mb-4 border-light" />
-        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
           {loading ? (
-            <p>Loading...</p>
+            <div className="loading-container">
+              <p>Loading top rated media...</p>
+            </div>
           ) : media.length === 0 ? (
-            <div className="col-12">
-              <div className="alert alert-info text-center">No media items found.</div>
+            <div className="empty-watchlist">
+              <div className="empty-icon">📊</div>
+              <h4>No media found</h4>
+              <p className="text-muted">Unable to load the top rated content.</p>
             </div>
           ) : (
-            media.map((item) => (
-              <div className="col" key={item._id}>
-                <div className="card h-100 shadow-sm media-card bg-dark text-light">
-                  <img
-                    src={item.poster}
-                    className="card-img-top"
-                    style={{ height: '300px', objectFit: 'cover' }}
-                    alt={item.title}
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title text-center clamp-2-lines">
+            <div className="watchlist-items">
+              {media.map((item, index) => (
+                <div className="watchlist-item" key={item._id}>
+                  <div className="item-number">
+                    {index + 1}
+                  </div>
+                  
+                  <div className="item-poster">
+                    <img 
+                      src={item.poster || '/logo192.png'} 
+                      alt={item.title}
+                      onError={(e) => {e.target.src = '/logo192.png'}}
+                    />
+                  </div>
+                  
+                  <div className="item-details">
+                    <div className="item-title">
                       {item.title}
-                    </h5>
-                    <div className="text-center mt-2">
-                      <span className="rating-badge">
-                        ★ {item.average_rating?.toFixed(1) || 'N/A'}
-                      </span>
                     </div>
-                    <div className="text-center mt-2">
-                      <span className="comment-count-badge">
-                        Reviews: {item.total_votes || 0}
-                      </span>
+                    <div className="item-subtitle">
+                      {item.director || 'Unknown Director'}
                     </div>
                   </div>
-                  <div className="card-footer bg-transparent text-center border-0">
-                    <Link to={`/media/${item._id}`} className="btn btn-outline-primary btn-sm">
-                      View Details
+                  
+                  <div className="item-type">
+                    {item.media === 'TV_series' ? 'TV' : item.media === 'Movies' ? 'Movie' : item.media || 'Unknown'}
+                  </div>
+                  
+                  <div className="item-rating">
+                    ★ {item.average_rating?.toFixed(1) || 'N/A'} ({item.total_votes || 0})
+                  </div>
+                  
+                  <div className="item-actions">
+                    <Link 
+                      to={`/media/${item._id}`} 
+                      className="btn-action view"
+                      title="View Details"
+                    >
+                      View
                     </Link>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -70,7 +70,7 @@ function NavBar() {
           {isAdmin && (
             <li className="nav-item">
               <Link className="nav-link nav-link-professional" to="/admin/requests">
-                 Admin Requests
+                 Requests
               </Link>
             </li>
           )}
